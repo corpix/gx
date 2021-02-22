@@ -1,0 +1,7 @@
+.personal.*
+/build
+/.env
+/.cache/*
+/.config/*
+/.local/*
+/.gerbil/*

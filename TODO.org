@@ -1,0 +1,15 @@
+* TODO ask wtf with modules
+  =gxpkg link corpix/gerbilstd .= is not working as expected:
+
+  #+BEGIN_SRC scheme
+  (user)> (import-module ':corpix/gerbilstd/string #t #t)
+  ; Evaluation aborted on Syntax Error
+  *** ERROR IN ?
+  --- Syntax Error: Cannot find library module
+  ... form:   .
+  (user)> (add-load-path (path-normalize "."))
+  #!void
+  (user)> (import-module ':corpix/gerbilstd/string #t #t)
+  #<module-context #20>
+  (user)>
+  #+END_SRC

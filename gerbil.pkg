@@ -1,0 +1,2 @@
+;; -*- mode: gerbil -*-
+(package: corpix/gerbilstd)
