@@ -113,16 +113,24 @@
 	       (value   (cdr field))
 	       ((values parms mime payload)
 		(cond
-		 ((string? value) (values #f #f value))
-		 ((port?   value) (values '(("filename" . "file"))
-					  "application/octet-stream"
-					  value))
-		 ((form-field? value) (values (form-field-parms   value)
-					      (form-field-mime    value)
-					      (form-field-payload value)))
+		 ((u8vector? value)
+		  (values '(("filename" . "file"))
+			  "application/octet-stream"
+			  value))
+		 ((port? value)
+		  (values '(("filename" . "file"))
+			  "application/octet-stream"
+			  value))
+		 ((number? value)
+		  (values #f #f (number->string value)))
+		 ((string? value)
+		  (values #f #f value))
+		 ((form-field? value)
+		  (values (form-field-parms   value)
+			  (form-field-mime    value)
+			  (form-field-payload value)))
 		 (else
-		  (error (format "expected string/port/form-field, got: ~a"
-				 value))))))
+		  (error (format "unexpected value: ~a" value))))))
 
 	  (write-u8vector delimiter port)
 	  (write-u8vector +crlf+ port)
@@ -145,8 +153,9 @@
 	  ;;
 	  (write-u8vector +crlf+ port)
 	  (cond
-	   ((string? payload) (write-u8vector (string->utf8 payload) port))
-	   ((port? payload)   (copy-port payload port))
+	   ((u8vector? payload) (write-u8vector payload port))
+	   ((port? payload)     (copy-port payload port))
+	   ((string? payload)   (write-u8vector (string->utf8 payload) port))
 	   (else (error "unexpected payload type: ~a" payload)))
 	  (write-u8vector +crlf+ port))
 	(loop (cdr rest)))))
