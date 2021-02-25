@@ -23,15 +23,13 @@
   http-headers-cookies
   http-headers-cons http-headers-cons!
   with-request
-  request? request
-  request-headers
+  request? request request-port request-url request-history request-status request-status-text request-headers request-body
   request-encoding request-encoding-set!
   request-content
   request-text
   request-json
   request-cookies
   request-close
-  request-port
   *request-id*
   request-id)
 
