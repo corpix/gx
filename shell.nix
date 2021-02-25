@@ -44,6 +44,7 @@ in stdenv.mkDerivation rec {
 
     gerbil-unstable
     zlib
+    gnuplot
     md4c
   ];
   shellHook = ''
