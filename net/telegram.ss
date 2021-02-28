@@ -1,11 +1,12 @@
 (import :gerbil/gambit
 	:std/srfi/1
 	:std/sugar
-	:std/logger
+	:std/iter
 	:std/text/json
 	:std/text/utf8
 	(for-syntax :std/iter
 		    :std/format)
+	:corpix/gerbilstd/scheme
 	:corpix/gerbilstd/list
 	:corpix/gerbilstd/string
 	:corpix/gerbilstd/proc
@@ -16,10 +17,14 @@
   *timeout*
   *poll-timeout*
   *log*
+
   get-me
   get-updates
   send-message
-  send-photo)
+  send-photo
+
+  dispatch
+  for/telegram)
 
 ;;
 
@@ -27,7 +32,7 @@
 (def *url*          (make-parameter "https://api.telegram.org"))
 (def *timeout*      (make-parameter 5))
 (def *poll-timeout* (make-parameter 120))
-(def *log*          (make-parameter log-message))
+(def *log*          (make-parameter (lambda xs (displayln xs))))
 
 ;;
 
@@ -131,3 +136,32 @@
 	     photo:      photo
 	     caption:    (caption ""))
   (#f decode-json))
+
+;;
+
+(defsyntax dispatch
+  (syntax-rules (<>)
+    ((dispatch <> case0 cases ...)
+     (lambda (t) (dispatch t case0 cases ...)))
+    ((dispatch table (key action) ...)
+     (let ((t table))
+       (and (hash-table? t)
+	    (let ((results
+		   (cond*
+		    ((hash-ref t key #f) => action) ...)))
+	      (if (pair? results)
+		results #f)))))))
+
+(defsyntax for/telegram
+  (syntax-rules ()
+    ((for/telegram sym body0 body ...)
+     (let ((thunk (lambda (sym) body0 body ...))
+	   (offset 0))
+       (let loop ((updates (get-updates)))
+	 (for ((update updates))
+	   (unless (hash-table? update)
+	     (error "expected update to be a hash-table, got:" update))
+	   (set! offset (hash-ref update 'update_id))
+	   (*log* (json-object->string update))
+	   (thunk update))
+	 (loop (get-updates offset: (+ 1 offset))))))))
