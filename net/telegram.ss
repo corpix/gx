@@ -22,6 +22,7 @@
   get-updates
   send-message
   send-photo
+  answer-inline-query
 
   dispatch
   for/telegram)
@@ -136,6 +137,12 @@
 	     photo:      photo
 	     caption:    (caption ""))
   (#f decode-json))
+
+(defapimethod
+  (answer-inline-query 'POST "answerInlineQuery")
+  (json query-id: inline_query_id
+	answers: results)
+  (encode-json decode-json))
 
 ;;
 
