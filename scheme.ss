@@ -1,6 +1,7 @@
-(export cond*)
 (import (for-syntax :std/sugar
 		    :std/stxutil))
+(export cond*
+	struct-set!)
 
 ;; cond for multiple choices
 (defrules cond* (else =>)
@@ -38,3 +39,18 @@
 ;;        ((eq? 1 1) 'first-sym)
 ;;        (2)
 ;;        (else 1)) ;; => ((the-doom-is-here 666) second-sym first-sym 2 1)
+
+(defsyntax (struct-set! stx)
+  (syntax-case stx ()
+    ((_ struct type key value)
+     (with-syntax ((field-set! (format-id #'stx "~a-~a-set!" #'type #'key)))
+       (syntax (field-set! struct value))))))
+
+;; (defstruct x (y z))
+;; (def xx (x 1 2))
+;; (x-y xx) ;; 1
+;; (x-z xx) ;; 2
+;; (struct-set! xx x y 666)
+;; (struct-set! xx x z 777)
+;; (x-y xx) ;; 666
+;; (x-z xx) ;; 777
