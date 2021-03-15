@@ -2,7 +2,7 @@
 	:std/format)
 (export +iso8601-format+
 	+iso8601-nano-format+
-
+	;;
 	nanosecond
 	microsecond
 	millisecond
@@ -11,7 +11,7 @@
 	hour
 	day
 	week
-
+	;;
 	nanosecond-duration
 	microsecond-duration
 	millisecond-duration
@@ -20,19 +20,17 @@
 	hour-duration
 	day-duration
 	week-duration
-	duration-unit
+	duration-units
 	string->duration
-
+	duration->string
+	;;
 	unix-microseconds
 	unix-milliseconds
 	unix-seconds
-
 	time->time-utc
 	time->unix-nano
-
 	time->date
 	date->time
-
 	time->string
 	string->time
 
@@ -74,21 +72,15 @@
 (def (day-duration i)         (make-duration i day))
 (def (week-duration i)        (make-duration i week))
 
-(def (duration-unit u)
-  (case u
-    ((w)  week)
-    ((d)  day)
-    ((h)  hour)
-    ((m)  minute)
-    ((s)  second)
-    ((ms) millisecond)
-    ((µs) microsecond)
-    ((ns) nanosecond)
-    (else (error (format "unexpected duration unit ~s" u)))))
-
-;; TODO: implement duration->string
-;; (def (duration->string)
-;;   )
+(def duration-units
+  `((w  . ,week)
+    (d  . ,day)
+    (h  . ,hour)
+    (m  . ,minute)
+    (s  . ,second)
+    (ms . ,millisecond)
+    (µs . ,microsecond)
+    (ns . ,nanosecond)))
 
 (def (string->duration s)
   (def signs  '(#\+ #\-))
@@ -170,17 +162,47 @@
 		      +1)))
 	    (amount (let loop ((acc 0) (rest tree))
 		      (if (pair? rest)
-			(loop (+ acc (* (caar rest)
-					(duration-unit (cdar rest))))
-			      (cdr rest))
+			(let* ((unit (cdar rest))
+			       (ns   (cdr (or (assoc unit duration-units)
+					      (error (format "unexpected duration unit ~s" unit))))))
+			  (loop (+ acc (* (caar rest) ns))
+				(cdr rest)))
 			acc))))
 	(make-duration (* sign amount) nanosecond))
       (make-duration 0 nanosecond)))
   ;;
   (fold (normalize (tokenize s))))
 
-;; (parse-duration "1m6s15ms10µs666ns")  ;; => #<time #77 type: time-duration nanosecond: 15010666 second: 66>
-;; (parse-duration "-1m6s15ms10µs666ns") ;; => #<time #77 type: time-duration nanosecond: -15010666 second: -66>
+;; (string->duration "1m6s15ms10µs666ns")  ;; => #<time #77 type: time-duration nanosecond: 15010666 second: 66>
+;; (string->duration "-1m6s15ms10µs666ns") ;; => #<time #77 type: time-duration nanosecond: -15010666 second: -66>
+
+(def (duration->string t)
+  (unless (eq? (time-type t) time-duration)
+    (error (format "expected time-duration type, got: ~a"
+		   (time-type t))))
+  (let* ((timestamp (time->unix-nano t))
+	 (duration-str (let loop ((units  duration-units)
+				  (acc    "")
+				  (ns    (abs timestamp)))
+			 (if (and (pair? units)
+				  (> ns 0))
+			   (let* ((unit-ns (cdar units))
+				  (unit    (quotient ns unit-ns)))
+			     (if (> unit 0)
+			       (loop (cdr units)
+				     (string-append acc
+						    (number->string unit)
+						    (symbol->string (caar units)))
+				     (remainder ns unit-ns))
+			       (loop (cdr units) acc ns)))
+			   acc))))
+    (if (negative? timestamp)
+      (string-append "-" duration-str)
+      duration-str)))
+
+;; (duration->string (string->duration "1m6s15ms10µs666ns"))           ;; => 1m6s15ms10µs666ns
+;; (duration->string (string->duration "01m006s015ms00010µs000666ns")) ;; => 1m6s15ms10µs666ns
+;; (duration->string (string->duration "-1m6s15ms10µs666ns"))          ;; => -1m6s15ms10µs666ns
 
 ;;
 
