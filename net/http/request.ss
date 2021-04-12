@@ -30,8 +30,10 @@
   request-json
   request-cookies
   request-close
-  *request-id*
-  request-id)
+  request-id
+  *make-request-id*
+  make-connection
+  *make-connection*)
 
 ;;
 
@@ -53,15 +55,12 @@
 
 ;;
 
-(def tls-context (delay (make-tls-context)))
-
-;;
-
 (def (http-get url
                redirect: (redirect #f)
                headers:  (headers  #f)
                cookies:  (cookies  #f)
                query:    (query    #f)
+	       port:     (port     #f)
 	       auth:     (auth     #f))
   (http-request 'GET url
 		redirect:  redirect
@@ -71,6 +70,7 @@
 		multipart: #f
 		query:     query
 		body:      #f
+		port:      port
 		auth:      auth))
 
 (def (http-head url
@@ -78,6 +78,7 @@
                 headers:  (headers  #f)
                 cookies:  (cookies  #f)
                 query:    (query    #f)
+		port:     (port     #f)
 		auth:     (auth     #f))
   (http-request 'HEAD url
 		redirect:  redirect
@@ -87,6 +88,7 @@
 		multipart: #f
 		query:     query
 		body:      #f
+		port:      port
 		auth:      auth))
 
 (def (http-post url
@@ -97,6 +99,7 @@
 		multipart: (multipart #f)
                 query:     (query     #f)
                 body:      (body      #f)
+		port:      (port      #f)
 		auth:      (auth      #f))
   (http-request 'POST url
 		redirect:  redirect
@@ -106,6 +109,7 @@
 		multipart: multipart
 		query:     query
 		body:      body
+		port:      port
 		auth:      auth))
 
 (def (http-put url
@@ -116,6 +120,7 @@
 	       multipart: (multipart #f)
                query:     (query     #f)
                body:      (body      #f)
+	       port:      (port      #f)
 	       auth:      (auth      #f))
   (http-request 'PUT url
 		redirect:  redirect
@@ -125,6 +130,7 @@
 		multipart: multipart
 		query:     query
 		body:      body
+		port:      port
 		auth:      auth))
 
 (def (http-delete url
@@ -135,6 +141,7 @@
 		  multipart: (multipart #f)
                   query:     (query     #f)
 		  body:      (body      #f)
+		  port:      (port      #f)
                   auth:      (auth      #f))
   (http-request 'DELETE url
 		redirect:  redirect
@@ -144,17 +151,20 @@
 		multipart: multipart
 		query:     query
 		body:      body
+		port:      port
 		auth:      auth))
 
 (def (http-options url
                    headers:  (headers #f)
                    cookies:  (cookies #f)
                    query:    (query   #f)
+		   port:     (port    #f)
 		   auth:     (auth    #f))
   (http-request 'OPTIONS url
 		headers:   headers
 		cookies:   cookies
 		query:     query
+		port:      port
 		auth:      auth))
 
 ;;
@@ -167,6 +177,7 @@
 		   multipart: (multipart #f)
 		   query:     (query     #f)
 		   body:      (body      #f)
+		   port:      (port      #f)
 		   auth:      (auth      #f)
 		   history:   (history   '()))
   (let* ((url (if (url? url) url (string->url url)))
@@ -179,7 +190,7 @@
 			      (multipart-random-boundary)
 			      multipart))))
          (body
-	  (let (choice (or body multipart form))
+	  (let ((choice (or body multipart form)))
 	    (cond
 	     ((not             choice) #f)
 	     ((input-port?     choice) choice)
@@ -215,17 +226,8 @@
 			   acc)))
 		   (else acc)))
 	   (or headers '())))
-         (tcp-client-options
-	  (let (options (list
-			 server-address: (url-host url)
-			 port-number: (url-port url)
-			 eol-encoding: 'cr-lf))
-	    (if (url-https? url)
-              (cons* tls-context: (force tls-context) options)
-              options)))
-         (sock (open-tcp-client tcp-client-options))
+         (sock (or port (make-connection url)))
          (req  (make-request sock url history)))
-    (force-output (current-output-port))
     (http-request-write sock method (url->path url) headers body)
     (http-request-read-response! req)
     (cond
@@ -246,7 +248,7 @@
   (syntax-case stx ()
     ((_ (name ctr) body ...)
      (syntax
-      (let (name ctr)
+      (let ((name ctr))
 	(try body ...
 	     (finally (request-close name))))))))
 
@@ -282,9 +284,9 @@
 
 (def (make-http-headers headers cookies auth)
   (http-headers-cons! headers
-    (chain (*http-base-headers*)
-      (http-headers-cons <> (http-headers-cookies (or cookies '())))
-      (http-headers-cons <> (http-headers-auth auth)))))
+		      (chain (*http-base-headers*)
+			(http-headers-cons <> (http-headers-cookies (or cookies '())))
+			(http-headers-cons <> (http-headers-auth auth)))))
 
 (def (http-headers-host host port)
   (cons +header-host+
@@ -320,10 +322,10 @@
 (def (http-headers-cons new-headers headers)
   (def (fold-e header headers)
     (with ([key . value] header)
-      (let (key (string-titlecase (header-string-e key)))
+      (let ((key (string-titlecase (header-string-e key))))
         (if (assoc key headers)
           headers
-          (let (value (format "~a" value))
+          (let ((value (format "~a" value)))
             (cons (cons key value) headers))))))
   (foldr fold-e headers new-headers))
 
@@ -369,15 +371,15 @@
          (string->number status))
        (set! (request-status-text req)
          (string-trim-both status-text))
-       (let (root [#f])
+       (let ((root [#f]))
          (let lp ((tl root))
-           (let (next (read-response-line port))
+           (let ((next (read-response-line port)))
              (if (string-empty? next)
                (set! (request-headers req)
                  (cdr root))
                (match (pregexp-match header-line-rx next)
                  ([_ key value]
-                  (let (tl* [(cons (string-titlecase key) (string-trim-both value))])
+                  (let ((tl* [(cons (string-titlecase key) (string-trim-both value))]))
                     (set! (cdr tl) tl*)
                     (lp tl*)))
                  (else
@@ -404,7 +406,7 @@
     (http-request-read-simple-body port (length-e headers)))))
 
 (def (http-request-read-chunked-body port)
-  (let (root [#f])
+  (let ((root [#f]))
     (let lp ((tl root))
       (let* ((line (read-response-line port))
              (clen (string->number (car (string-split line #\space)) 16)))
@@ -416,7 +418,7 @@
               (raise-io-error 'http-request-read-body
                               "error reading chunk; premature end of port"))
             (read-response-line port)     ; read chunk trailing CRLF
-            (let (tl* [chunk])
+            (let ((tl* [chunk]))
               (set! (cdr tl) tl*)
               (lp tl*))))))))
 
@@ -431,7 +433,7 @@
         data)))
 
   (def (read/end port)
-    (let (root [#f])
+    (let ((root [#f]))
       (let lp ((tl root))
         (let* ((buflen 4096)
                (buf (make-u8vector buflen))
@@ -444,7 +446,7 @@
             (set! (cdr tl) [buf])
             (append-u8vectors (cdr root)))
            (else
-            (let (tl* [buf])
+            (let ((tl* [buf]))
               (set! (cdr tl) tl*)
               (lp tl*))))))))
 
@@ -457,15 +459,15 @@
 (def crlf (u8vector cr lf))
 
 (def (read-response-line port)
-  (let (root [#f])
+  (let ((root [#f]))
     (let lp ((tl root))
-      (let (next (read-u8 port))
+      (let ((next (read-u8 port)))
         (cond
          ((eof-object? next)
           (raise-io-error 'request-read-response-line
                           "Incomplete response; connection closed" port))
          ((eq? next cr)
-          (let (next (read-u8 port))
+          (let ((next (read-u8 port)))
             (cond
              ((eof-object? next)
               (raise-io-error 'request-read-response-line
@@ -473,11 +475,11 @@
              ((eq? next lf)
               (utf8->string (list->u8vector (cdr root))))
              (else
-              (let (tl* [cr next])
+              (let ((tl* [cr next]))
                 (set! (cdr tl) tl*)
                 (lp (cdr tl*)))))))
          (else
-          (let (tl* [next])
+          (let ((tl* [next]))
             (set! (cdr tl) tl*)
             (lp tl*))))))))
 
@@ -494,7 +496,7 @@
    ((request-body req) => values)
    ((request-port req)
     => (lambda (port)
-         (let (headers (request-headers req))
+         (let ((headers (request-headers req)))
            (try
             (let* ((body (http-request-read-body port headers))
                    (body
@@ -542,5 +544,28 @@
        (else #!void)))))
 ;;
 
-(def *request-id* (make-parameter (lambda () (uuid->string (random-uuid)))))
-(def (request-id) ((*request-id*)))
+(def *make-request-id*
+  (make-parameter (lambda () (uuid->string (random-uuid)))))
+
+(def (request-id)
+  ((*make-request-id*)))
+
+;;
+
+(def tls-context (delay (make-tls-context)))
+
+(def *make-connection*
+  (make-parameter
+   (lambda (url)
+     (let ((url (if (url? url) url (string->url url))))
+       (open-tcp-client
+	(let ((options (list
+			server-address: (url-host url)
+			port-number: (url-port url)
+			eol-encoding: 'cr-lf)))
+	  (if (url-https? url)
+	    (cons* tls-context: (force tls-context) options)
+	    options)))))))
+
+(def (make-connection url)
+  ((*make-connection*) url))
