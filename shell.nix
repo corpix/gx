@@ -1,4 +1,4 @@
-let nixpkgs = <nixpkgs>;
+let nixpkgs = ./nix/nixpkgs.nix;
     config  = {};
 in
 with builtins;
