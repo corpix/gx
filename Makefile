@@ -33,6 +33,9 @@ docker_shell_opts = -v $(docker_shell_volume):/nix:rw \
 	--hostname $(namespace).localhost             \
 	$(foreach v,$(ports), -p $(v):$(v) )
 
+wildcard/r = $(foreach d,$(wildcard $1*),$(call wildcard/r,$d/,$2)$(filter $(subst *,%,$2),$d))
+tests := $(foreach v,$(call wildcard/r,,*-test.ss),:corpix/gerbilstd/$(patsubst %.ss,%,$(v)))
+
 ## macro
 
 define fail
@@ -66,7 +69,12 @@ run: build # run application
 
 .PHONY: test
 test: # run unit tests
-	@echo no unit tests runner defined
+	gxi                                              \
+		-e "(add-load-path (current-directory))" \
+		-e "(import :corpix/gerbilstd/test)"     \
+		-e "(import $(tests))"                   \
+		-e "(test!)"
+
 
 #### environment management
 

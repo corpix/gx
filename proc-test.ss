@@ -1,12 +1,8 @@
-(import :std/test
-	"./proc.ss")
-(export proc-test)
+(import :corpix/gerbilstd/test
+	:corpix/gerbilstd/proc)
 
-(def proc-test
-  (test-suite "test proc"
-    (test-case "->"
-      (check-equal? (-> 1) 1)
-      (check-equal? (-> 1 (+ 1)) 2)
-      (check-equal? (-> 1 (+ 1) (* 2)) 4))))
-
-(run-test-suite! proc-test)
+(deftest "test proc"
+  ("->"
+   (check-equal? (-> 1) 1)
+   (check-equal? (-> 1 (+ 1)) 2)
+   (check-equal? (-> 1 (+ 1) (* 2)) 4)))

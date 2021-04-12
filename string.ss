@@ -1,6 +1,7 @@
 (import :std/srfi/13)
-(export *->string
-	(import: :std/srfi/13))
+(export (import: :std/srfi/13)
+	*->string
+	string-contains-any)
 
 (def (*->string s)
   (cond
