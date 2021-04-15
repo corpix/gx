@@ -2,7 +2,17 @@
 	:corpix/gerbilstd/test
 	:corpix/gerbilstd/net/url)
 
-(deftest "test request"
+(deftest "test url"
+  ("url-http?"
+   (check-eq? (url-http? (url +scheme-http+ "localhost" 80 "/" #f))
+	      #t)
+   (check-eq? (url-http? (url +scheme-https+ "localhost" 443 "/" #f))
+	      #f))
+  ("url-https?"
+   (check-eq? (url-https? (url +scheme-http+ "localhost" 80 "/" #f))
+	      #f)
+   (check-eq? (url-https? (url +scheme-https+ "localhost" 443 "/" #f))
+	      #t))
   ("string->url"
    (check-equal? (string->url "http://localhost")
 		 (url +scheme-http+ "localhost" 80 "/" #f))
