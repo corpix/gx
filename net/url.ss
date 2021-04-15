@@ -2,10 +2,7 @@
 	:std/pregexp
 	:std/net/uri)
 (export
-  url? url url-scheme url-host url-port url-target url-query
-  url-host-set! url-port-set! url-query-set! url-scheme-set! url-target-set!
-  url-http? url-https?
-  url->string string->url url->path
+  (struct-out url) url-http? url-https? url->string string->url url->path
   +scheme-http+ +scheme-https+
   +scheme-http-port+ +scheme-https-port+)
 
@@ -14,11 +11,12 @@
 (defconst +scheme-http-port+  80)
 (defconst +scheme-https-port+ 443)
 
-(def url-rx (pregexp "(?:(https?)://)?([^/:]+)(:[0-9]+)?(/.*)?(?:\\?)?(.+)?"))
+(def url-rx (pregexp "(?:(https?)://)?([^/:]+)(:[0-9]+)?(/[^\?]*)?(?:\\?)?(.+)?"))
 
 ;;
 
-(defstruct url (scheme host port target query))
+(defstruct url (scheme host port target query)
+  transparent: #t)
 
 (def (url-http? url)
   (equal? (url-scheme url)
@@ -42,16 +40,26 @@
 
 (def (url->string u)
   (let ((scheme (url-scheme u))
-	(query  (url-query u)))
+	(port   (url-port   u))
+	(query  (url-query  u)))
     (string-append
      scheme
      "://"
      (url-host u)
-     (if (or (equal? scheme +scheme-http+)
-	     (equal? scheme +scheme-https+)) ""
-	     (format ":~a" (url-port u)))
-     (url-target u)
-     (if query (form-url-encode query) ""))))
+     (if (or (and (eq? port +scheme-http-port+)
+		  (equal? scheme +scheme-http+))
+	     (and (eq? port +scheme-https-port+)
+		  (equal? scheme +scheme-https+)))
+       ""
+       (format ":~a" (url-port u)))
+     (let ((target (url-target u)))
+       (if (and (equal? target "/")
+		(not query))
+	 ""
+	 target))
+     (if query
+       (string-append "?" (form-url-encode query))
+       ""))))
 
 (def (url->path u)
   (let ((query (url-query u)))
