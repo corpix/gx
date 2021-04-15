@@ -1,5 +1,7 @@
 (import :std/text/utf8
 	:std/format
+	:std/event
+	:std/misc/barrier
 	:gerbil/gambit/threads
 	:corpix/gerbilstd/test
 	:corpix/gerbilstd/net/url
@@ -23,23 +25,33 @@
 						(u8vector-length data)))
 				       data)))
 	   (write-subu8vector res 0 (u8vector-length res) client)
-	   (close-output-port client)
 	   (check-equal? (request-content (http-get url)) data)
 	   (check-equal? (get-output-u8vector client) #u8())))))
     ("http-get without content-length"
      (let* ((url "http://localhost")
-	    ((values client server) (open-u8vector-pipe
-				     (list buffering: #t)
-				     (list buffering: #t)))
+	    (data (string->utf8 "hello world"))
+	    ((values client server) (open-u8vector-pipe))
 	    (make-connection (lambda (request-url)
 			       (begin0 server
 				 (check-equal? (url->string request-url)
-					       (url->string (string->url url)))))))
+					       (url->string (string->url url))))))
+	    (res-u8 (u8vector-append (string->utf8 "HTTP/1.1 200 OK\r\n\r\n") data))
+	    (req-u8 (string->utf8 "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"))
+	    (content #f)
+	    (b (make-barrier 2)))
        (parameterize ((*make-http-connection* make-connection))
-	 (let* ((data (string->utf8 "hello world"))
-		(res  (u8vector-append (string->utf8 "HTTP/1.1 200 OK\r\n\r\n") data)))
-	   (write-subu8vector res 0 (u8vector-length res) client)
-	   (close-output-port client)
-	   (check-equal? (request-content (http-get url)) data)
-	   (check-equal? (get-output-u8vector client) #u8()))))))
-  (test!))2
+	 (spawn (lambda ()
+		  (set! content (request-content (http-get url)))
+		  (close-port server)
+		  (barrier-post! b)))
+	 (spawn (lambda ()
+		  (write-subu8vector res-u8 0 (u8vector-length res-u8) client)
+		  (force-output client)
+		  (close-port client)
+		  (barrier-post! b)))
+	 (barrier-wait! b)
+	 (check-equal? content data)
+	 (check-equal? (utf8->string (get-output-u8vector client)) "")
+	 (check-equal? (utf8->string (get-output-u8vector server))
+		       (utf8->string req-u8))))))
+  (test!))

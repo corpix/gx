@@ -53,6 +53,10 @@
 
 (defconst +auth-type-basic+ "Basic")
 
+(def cr (char->integer #\return))
+(def lf (char->integer #\newline))
+(def crlf (u8vector cr lf))
+
 ;;
 
 (def (http-get url
@@ -346,10 +350,15 @@
 ;;
 
 (def (http-request-write port method target headers body)
-  (fprintf port "~a ~a HTTP/1.1~n" method target)
-  (for-each (match <> ([key . val] (fprintf port "~a: ~a~n" key val)))
+  (def crlf-len (u8vector-length crlf))
+  (fprintf port "~a ~a HTTP/1.1" method target)
+  (write-subu8vector crlf 0 crlf-len port)
+  (for-each (match <>
+	      ([key . val]
+	       (fprintf port "~a: ~a" key val)
+	       (write-subu8vector crlf 0 crlf-len port)))
             headers)
-  (newline port)
+  (write-subu8vector crlf 0 crlf-len port)
   (when body
     (cond
      ((input-port?     body) (copy-port body port))
@@ -454,10 +463,6 @@
   (if length
     (read/length port length)
     (read/end port)))
-
-(def cr (char->integer #\return))
-(def lf (char->integer #\newline))
-(def crlf (u8vector cr lf))
 
 (def (read-response-line port)
   (let ((root [#f]))
