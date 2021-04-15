@@ -1,4 +1,4 @@
-(import	:std/text/utf8
+(import :std/text/utf8
 	:std/format
 	:gerbil/gambit/threads
 	:corpix/gerbilstd/test
