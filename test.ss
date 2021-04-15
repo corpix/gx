@@ -1,17 +1,20 @@
 (import	:std/test)
 (export (import: :std/test)
-	*test-suites*
+	make-tests
+	*tests*
 	deftest
 	test!)
 
-(def *test-suites* (make-parameter (box '())))
+(def (make-tests . xs) (box xs))
+
+(def *tests* (make-parameter (make-tests)))
 
 (defrules deftest ()
   ((_ desc body ...)
-   (let ((test-suites (*test-suites*)))
-     (box-set! test-suites
+   (let ((tests (*tests*)))
+     (box-set! tests
 	       (cons (test-suite desc (~deftest-aux body ...))
-		     (unbox test-suites))))))
+		     (unbox tests))))))
 
 (defrules ~deftest-aux ()
   ((_ (case body ...))
@@ -21,6 +24,6 @@
 
 (def (test!)
   (displayln)
-  (apply run-tests! (reverse (unbox (*test-suites*))))
+  (apply run-tests! (reverse (unbox (*tests*))))
   (displayln)
   (test-report-summary!))
