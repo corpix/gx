@@ -2,7 +2,7 @@
 	:std/format
 	:std/event
 	:std/misc/barrier
-	:gerbil/gambit/threads
+	:gerbil/gambit
 	:corpix/gerbilstd/test
 	:corpix/gerbilstd/net/url
 	:corpix/gerbilstd/net/http/request)
