@@ -32,8 +32,8 @@
   request-close
   request-id
   *make-request-id*
-  make-connection
-  *make-connection*)
+  make-http-connection
+  *make-http-connection*)
 
 ;;
 
@@ -226,9 +226,10 @@
 			   acc)))
 		   (else acc)))
 	   (or headers '())))
-         (sock (or port (make-connection url)))
+         (sock (or port (make-http-connection url)))
          (req  (make-request sock url history)))
     (http-request-write sock method (url->path url) headers body)
+    (force-output sock)
     (http-request-read-response! req)
     (cond
      ((and redirect
@@ -417,7 +418,7 @@
             (when (##fx< rd clen)
               (raise-io-error 'http-request-read-body
                               "error reading chunk; premature end of port"))
-            (read-response-line port)     ; read chunk trailing CRLF
+            (read-response-line port) ;; read chunk trailing CRLF
             (let ((tl* [chunk]))
               (set! (cdr tl) tl*)
               (lp tl*))))))))
@@ -500,17 +501,16 @@
            (try
             (let* ((body (http-request-read-body port headers))
                    (body
-                    (cond
-                     ((assoc +header-content-encoding+ headers)
-                      => (lambda (enc)
-                           (case (cdr enc)
-                             (("gzip" "deflate") (uncompress body))
-                             (("identity")        body)
-                             (else
-			      (error "Unsupported content encoding" enc)))))
-                     (else body))))
-              (set! (request-body req) body)
-              body)
+                    (and body (cond
+			       ((assoc +header-content-encoding+ headers)
+				=> (lambda (enc)
+				     (case (cdr enc)
+				       (("gzip" "deflate") (uncompress body))
+				       (("identity")        body)
+				       (else
+					(error "Unsupported content encoding" enc)))))
+			       (else body)))))
+              (begin0 body (set! (request-body req) body)))
             (finally
              (close-port port)
              (set! (request-port req) #f))))))
@@ -554,7 +554,7 @@
 
 (def tls-context (delay (make-tls-context)))
 
-(def *make-connection*
+(def *make-http-connection*
   (make-parameter
    (lambda (url)
      (let ((url (if (url? url) url (string->url url))))
@@ -567,5 +567,5 @@
 	    (cons* tls-context: (force tls-context) options)
 	    options)))))))
 
-(def (make-connection url)
-  ((*make-connection*) url))
+(def (make-http-connection url)
+  ((*make-http-connection*) url))
