@@ -1,7 +1,7 @@
 (import :corpix/gerbilstd/test
 	:corpix/gerbilstd/string)
 
-(deftest "test string"
+(deftest "string"
   ("*->string"
    (check-equal? (*->string foo:)
 		 "foo")

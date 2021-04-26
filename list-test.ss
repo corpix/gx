@@ -1,7 +1,7 @@
 (import	:corpix/gerbilstd/test
 	:corpix/gerbilstd/list)
 
-(deftest "test list"
+(deftest "list"
   ("split-by"
    (check-equal? (split-by '(1 2 3 4 5 6) 1)
 		 '((1) (2) (3) (4) (5) (6)))

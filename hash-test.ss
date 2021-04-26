@@ -1,7 +1,7 @@
 (import	:corpix/gerbilstd/test
 	:corpix/gerbilstd/hash)
 
-(deftest "test hash"
+(deftest "hash"
   ("hash-path-ref"
    (let ((table    (make-hash-table))
 	 (subtable (make-hash-table)))

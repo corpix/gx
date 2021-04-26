@@ -7,7 +7,7 @@
 	:corpix/gerbilstd/net/url
 	:corpix/gerbilstd/net/http/request)
 
-(deftest "test request"
+(deftest "net/http/request"
   ("http-get"
    (let* ((url "http://localhost")
 	  ((values client server) (open-u8vector-pipe

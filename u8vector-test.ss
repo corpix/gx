@@ -1,7 +1,8 @@
 (import :corpix/gerbilstd/test
 	:corpix/gerbilstd/exception
 	:corpix/gerbilstd/u8vector)
-(deftest "test u8vector"
+
+(deftest "u8vector"
   ("u8vector-index"
     (check-equal? (u8vector-index (u8vector 1 2 3) 3)
 		  2)

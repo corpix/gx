@@ -1,4 +1,5 @@
-(import	:std/test)
+(import	:std/test
+	:gerbil/gambit/threads)
 (export (import: :std/test)
 	make-tests
 	*tests*
@@ -24,6 +25,8 @@
 
 (def (test!)
   (displayln)
-  (apply run-tests! (reverse (unbox (*tests*))))
+  (with-exception-stack-trace
+   (lambda ()
+     (apply run-tests! (reverse (unbox (*tests*))))))
   (displayln)
   (test-report-summary!))

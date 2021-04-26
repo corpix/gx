@@ -2,7 +2,7 @@
 	:corpix/gerbilstd/test
 	:corpix/gerbilstd/net/url)
 
-(deftest "test url"
+(deftest "net/url"
   ("url-http?"
    (check-eq? (url-http? (url +scheme-http+ "localhost" 80 "/" #f))
 	      #t)
