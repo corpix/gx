@@ -1,14 +1,17 @@
-(import :std/srfi/13)
+(import :std/srfi/13
+	:std/text/utf8)
 (export (import: :std/srfi/13)
+	(import: :std/text/utf8)
 	*->string
 	string-contains-any)
 
 (def (*->string s)
   (cond
-   ((string? s)  s)
-   ((number? s)  (number->string s))
-   ((symbol? s)  (symbol->string s))
-   ((keyword? s) (keyword->string s))))
+   ((string? s)   s)
+   ((u8vector? s) (utf8->string s))
+   ((number? s)   (number->string s))
+   ((symbol? s)   (symbol->string s))
+   ((keyword? s)  (keyword->string s))))
 
 (def (string-contains-any s chrs)
   (def chrs-len (string-length chrs))

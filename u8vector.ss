@@ -1,5 +1,14 @@
-(export u8vector-index
+(import :std/text/utf8)
+(export *->u8vector
+	u8vector-index
 	u8vector-contains-any)
+
+(def (*->u8vector v)
+  (cond
+   ((string? v) (string->utf8 v))
+   ((u8vector? v) v)
+   ((char? v) (u8vector (char->integer v)))
+   (else (error "unsupported value given:" v))))
 
 (def (u8vector-index vec octet (start 0) (end (u8vector-length vec)))
   (let loop ((index start))
