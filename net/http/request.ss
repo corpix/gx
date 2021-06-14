@@ -569,7 +569,8 @@
        (open-tcp-client
 	(let ((options (list
 			server-address: (url-host url)
-			port-number: (url-port url)
+			port-number: (or (url-port url)
+					 (url-scheme->port (url-scheme url)))
 			eol-encoding: 'cr-lf)))
 	  (if (url-https? url)
 	    (cons* tls-context: (force tls-context) options)
