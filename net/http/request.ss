@@ -211,8 +211,7 @@
 	  (http-headers-cons
 	   (let loop ((content-type   #f)
 		      (content-length #f)
-		      (acc (list (http-headers-host (url-host url)
-						    (url-port url)))))
+		      (acc (list (http-headers-host url))))
 	     (cond ((and (not content-length)
 			 (u8vector? body))
 		    (loop content-type
@@ -293,12 +292,16 @@
 			(http-headers-cons <> (http-headers-cookies (or cookies '())))
 			(http-headers-cons <> (http-headers-auth auth)))))
 
-(def (http-headers-host host port)
-  (cons +header-host+
-	(cond
-	 ((or (eqv? +scheme-http-port+  port)
-	      (eqv? +scheme-https-port+ port)) host)
-	 (else (format "~a:~a" host port)))))
+(def (http-headers-host url)
+  (let ((scheme (url-scheme url)))
+    (cons +header-host+
+	  (cond
+	   ((or (equal? "http" scheme)
+		(equal? "https" scheme))
+	    (url-host url))
+	   (else (format "~a:~a"
+			 (url-host url)
+			 (url-scheme->port scheme)))))))
 
 (def (http-headers-auth auth)
   (def (basic-auth-header user password)

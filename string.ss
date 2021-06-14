@@ -2,8 +2,17 @@
 	:std/text/utf8)
 (export (import: :std/srfi/13)
 	(import: :std/text/utf8)
+	char-control?
 	*->string
-	string-contains-any)
+	string-contains-any
+	string-contains-control)
+
+(def (char-control? c)
+  (let ((n (char->integer c)))
+    ;; n < space && n == 0x7f (127)
+    (or (< n #x20) (= n #x7f))))
+
+;;
 
 (def (*->string s)
   (cond
@@ -25,3 +34,9 @@
 		 (cons i chr)
 		 (loop (+ n 1))))
 	     #f)))))
+
+(def (string-contains-control s)
+  (let loop ((n (- (string-length s) 1)))
+    (and (>= n 0)
+	 (or (char-control? (string-ref s n))
+	     (loop (- n 1))))))
