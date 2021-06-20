@@ -5,7 +5,7 @@
 (def (build-spec)
   `(
     "bnf"
-    "build"
+    "clickhouse"
     "exception"
     "fs"
     "hash"
