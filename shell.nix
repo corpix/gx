@@ -41,12 +41,11 @@ in stdenv.mkDerivation rec {
     glibcLocales bashInteractive man
     nix cacert curl utillinux coreutils
     git jq yq-go tmux findutils gnumake
+    hivemind
 
-    gerbil-unstable
-    zlib
+    gerbil-unstable zlib md4c libyaml openssl
+    clickhouse prometheus zookeeper
     gnuplot
-    md4c
-    libyaml
   ];
   shellHook = ''
     export root=$(pwd)
