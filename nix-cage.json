@@ -6,9 +6,11 @@
 	    ["./.config", "~/.config", "d"],
 	    ["./.local",  "~/.local", "d"],
 	    ["./.gerbil",  "~/.gerbil", "d"],
+	    ["$SSH_AUTH_SOCK", "$SSH_AUTH_SOCK"],
             "/run"
         ],
         "ro": [
+            "~/.ssh",
             "~/.gitconfig",
             "/"
         ],
