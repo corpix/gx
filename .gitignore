@@ -1,5 +1,6 @@
 .personal.*
 /build
+/build-deps
 /.env
 /.cache/*
 /.config/*

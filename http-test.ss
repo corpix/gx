@@ -4,8 +4,8 @@
 	:std/misc/barrier
 	:gerbil/gambit
 	:corpix/gerbilstd/test
-	:corpix/gerbilstd/net/url
-	:corpix/gerbilstd/net/http/request)
+	:corpix/gerbilstd/url
+	:corpix/gerbilstd/http)
 
 (deftest "net/http/request"
   ("http-get"

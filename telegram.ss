@@ -10,7 +10,7 @@
 	:corpix/gerbilstd/list
 	:corpix/gerbilstd/string
 	:corpix/gerbilstd/proc
-	:corpix/gerbilstd/net/http/request)
+	:corpix/gerbilstd/http)
 (export
   *token*
   *url*

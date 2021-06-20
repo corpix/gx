@@ -2,8 +2,8 @@
 
 ## parameters
 
-name              ?= telescheme
-namespace         ?= git.backbone/corpix
+name              = gerbilstd
+namespace         = corpix
 version           ?= development
 
 PARALLEL_JOBS ?= 8
@@ -17,8 +17,6 @@ tmux_session        := $(name)
 nix                 := nix $(NIX_OPTS)
 nix_dir             := ./nix
 docker_shell_volume := nix
-build_dir           := ./build
-binary              := $(build_dir)/main
 
 ### reusable and long opts for commands inside rules
 
@@ -34,7 +32,7 @@ docker_shell_opts = -v $(docker_shell_volume):/nix:rw \
 	$(foreach v,$(ports), -p $(v):$(v) )
 
 wildcard/r = $(foreach d,$(wildcard $1*),$(call wildcard/r,$d/,$2)$(filter $(subst *,%,$2),$d))
-tests := $(foreach v,$(call wildcard/r,,*-test.ss),:corpix/gerbilstd/$(patsubst %.ss,%,$(v)))
+tests := $(foreach v,$(call wildcard/r,,*-test.ss),:$(namespace)/$(name)/$(patsubst %.ss,%,$(v)))
 
 ## macro
 
@@ -58,20 +56,18 @@ help: # print defined targets and their comments
 
 ### development
 
+.PHONY: link
+link: # link (symlink from gerbil home to repo root) package for development
+	gxpkg link $(namespace)/$(name) .
+
 .PHONY: build
 build: # build application `binary`
-	mkdir -p $(build_dir)
-	gxc -exe -static -cc-options '$(CFLAGS)' -ld-options '$(LDFLAGS)' -o $(binary) ./main.scm
-
-.PHONY: run
-run: build # run application
-	$(binary)
+	gxpkg build $(namespace)/$(name)
 
 .PHONY: test
 test: # run unit tests
 	gxi                                              \
-		-e "(add-load-path (current-directory))" \
-		-e "(import :corpix/gerbilstd/test)"     \
+		-e "(import :$(namespace)/$(name)/test)" \
 		-e "(import $(tests))"                   \
 		-e "(test!)"
 

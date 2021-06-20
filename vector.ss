@@ -1,5 +1,7 @@
-(import :std/text/utf8)
-(export *->u8vector
+(import :std/srfi/133
+	:std/text/utf8)
+(export (import: :std/srfi/133)
+	*->u8vector
 	u8vector-index
 	u8vector-contains-any)
 

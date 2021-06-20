@@ -3,7 +3,7 @@
 	:std/error
 	:gerbil/gambit/threads
 	:corpix/gerbilstd/string
-	:corpix/gerbilstd/u8vector)
+	:corpix/gerbilstd/vector)
 (export parser-error parser-error? parser-error-state parser-error-buf parser-error-rule
 	buffer-not-exhausted-error buffer-not-exhausted-error? buffer-not-exhausted-error-state buffer-not-exhausted-error-buf
 	(struct-out parser-node)

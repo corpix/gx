@@ -13,8 +13,8 @@
 	:std/misc/uuid
         :std/misc/list-builder
 	:std/misc/ports
-	:corpix/gerbilstd/net/url
-	(prefix-in :corpix/gerbilstd/encoding/multipart multipart-))
+	:corpix/gerbilstd/url
+	(prefix-in :corpix/gerbilstd/multipart multipart-))
 (export
   http-get http-head http-post http-put http-delete http-options
   http-request
@@ -245,7 +245,11 @@
               (error "redirect loop detected in response from" url)
               (begin
                 (request-close req)
-                (http-request method new-url headers body (cons url history) #t))))))
+                (http-request method new-url
+			      headers:  headers
+			      body:     body
+			      history: (cons url history)
+			      redirect: #t))))))
      (else req))))
 
 (defsyntax (with-request stx)

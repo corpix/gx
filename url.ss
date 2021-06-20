@@ -1,9 +1,11 @@
 (import	:gerbil/gambit
 	:std/format
 	:std/net/uri
-	:corpix/gerbilstd/encoding/hex
+	:corpix/gerbilstd/hex
 	:corpix/gerbilstd/string)
 (export
+  (import: :std/net/uri)
+
   url-default-scheme-port
   *url-scheme-port*
 

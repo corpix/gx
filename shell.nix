@@ -46,6 +46,7 @@ in stdenv.mkDerivation rec {
     zlib
     gnuplot
     md4c
+    libyaml
   ];
   shellHook = ''
     export root=$(pwd)
@@ -57,9 +58,13 @@ in stdenv.mkDerivation rec {
 
     export LANG="en_US.UTF-8"
     export NIX_PATH="nixpkgs=${nixpkgs}"
+
     export GERBIL_BUILD_CORES=$(cat /proc/cpuinfo | grep -F processor | wc -l)
-    export CFLAGS="-I${zlib.dev}/include -I${md4c}/include"
-    export LDFLAGS="-lz -lmd4c"
+    # WTF?! strace -s4096 -o out gxi -e "(import :corpix/gerbilstd/test)" says it only looks into the $GERBIL_PATH/lib
+    export GERBIL_LOADPATH=$HOME/.gerbil/pkg
+
+    export CFLAGS="-I${zlib.dev}/include -I${md4c}/include -I${libyaml}/include"
+    export LDFLAGS="-lz -lmd4c -lyaml"
 
     if [ ! -z "$PS1" ]
     then

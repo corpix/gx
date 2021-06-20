@@ -4,8 +4,9 @@
 	:std/text/hex
 	:std/text/utf8
 	:gerbil/gambit
-	:corpix/gerbilstd/u8vector
+	:corpix/gerbilstd/vector
 	:corpix/gerbilstd/string)
+;; TODO: prefix
 (export form? form form-boundary form-fields
 	form->u8vector
 	form-field? form-field form-field-parms form-field-mime form-field-payload
