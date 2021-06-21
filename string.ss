@@ -1,6 +1,8 @@
-(import :std/srfi/13
+(import :std/format
+	:std/srfi/13
 	:std/text/utf8)
-(export (import: :std/srfi/13)
+(export (import: :std/format)
+	(import: :std/srfi/13)
 	(import: :std/text/utf8)
 	char-control?
 	*->string
