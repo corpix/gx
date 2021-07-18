@@ -1,6 +1,6 @@
 (import :std/sugar
-	:corpix/gerbilstd/yaml
-	:corpix/gerbilstd/test)
+	:corpix/gx/yaml
+	:corpix/gx/test)
 
 (deftest "yaml"
   ("yaml-load-string"

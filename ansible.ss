@@ -1,0 +1,42 @@
+(import :std/sugar
+	:corpix/gx/string
+	:corpix/gx/proc
+	:corpix/gx/yaml)
+(export playbook)
+
+(defrules ~playbook-aux (name port user hosts environment vars tasks handlers)
+  ((_ (name value))
+   '(name: value))
+  ((_ (port value))
+   '(port: value))
+  ((_ (user value))
+   '(remote_user: value))
+  ((_ (hosts value ...))
+   '(hosts: '(value ...)))
+  ((_ (environment (key value) ...))
+   '(environment: (hash (key value) ...)))
+  ((_ (vars (key value) ...))
+   '(vars: (hash (key value) ...)))
+  ((_ (tasks ((key value) ...) ...))
+   '(tasks: (list (hash (key value) ...) ...)))
+  ((_ (handlers ((key value) ...) ...))
+   '(handlers: (list (hash (key value) ...) ...))))
+
+(defrules playbook ()
+  ((playbook rest ...)
+   (->> (list (~playbook-aux rest) ...)
+	(cons 'hash)
+	(eval)
+	(list)
+	(yaml-dump-string))))
+
+(playbook
+ (name "hello")
+ (user "root")
+ (port 2222)
+ (hosts "localhost" "remotehost")
+ (vars (foo: 1) (bar: 2))
+ (tasks ((name: "find out my name")
+	 (shell: "whoami"))
+	((name: "leave part of myself on the host")
+	 (shell: (format "echo '2 + 2 = ~s' > /tmp/`whoami`-was-here" (+ 2 2))))))

@@ -1,6 +1,6 @@
 (import :std/format
-	:corpix/gerbilstd/test
-	:corpix/gerbilstd/url)
+	:corpix/gx/test
+	:corpix/gx/url)
 
 (deftest "net/url"
   ("string->url"

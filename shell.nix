@@ -1,4 +1,4 @@
-let nixpkgs = ./nix/nixpkgs.nix;
+let nixpkgs = import ./nixpkgs.nix;
     config  = {};
 in
 with builtins;
@@ -22,6 +22,30 @@ let
     ' "$@"
   '';
 
+  gambit = { callPackage, fetchurl }:
+    callPackage "${nixpkgs}/pkgs/development/compilers/gambit/build.nix" rec {
+      version = "4.9.3";
+      git-version = version;
+      src = fetchurl {
+        url = "http://www.iro.umontreal.ca/~gambit/download/gambit/v4.9/source/gambit-v4_9_3.tgz";
+        sha256 = "1p6172vhcrlpjgia6hsks1w4fl8rdyjf9xjh14wxfkv7dnx8a5hk";
+      };
+    };
+
+  gerbil = { callPackage, fetchFromGitHub, gambit, gambit-support }:
+    callPackage "${nixpkgs}/pkgs/development/compilers/gerbil/build.nix" rec {
+      version = "unstable-2020-11-05";
+      git-version = "0.16-152-g808929ae";
+      src = fetchFromGitHub {
+        owner = "vyzo";
+        repo = "gerbil";
+        rev = "808929aeb8823959191f35df53bc0c0150911b4b";
+        sha256 = "0d9k2gkrs9qvlnk7xa3gjzs3gln3ydds7yd2313pvbw4q2lcz8iw";
+      };
+      inherit gambit gambit-support;
+      gambit-params = gambit-support.unstable-params;
+    };
+
   md4c = stdenv.mkDerivation rec {
     pname = "md4c";
     version = "0.4.7";
@@ -35,6 +59,15 @@ let
 
     nativeBuildInputs = [cmake];
   };
+
+  scheme = let
+    gambitscheme = callPackage gambit {};
+    gerbilscheme = callPackage gerbil { gambit = gambitscheme; };
+  in [
+    #gambitscheme
+    #gerbilscheme
+    gerbil-unstable
+  ];
 in stdenv.mkDerivation rec {
   name = "nix-shell";
   buildInputs = [
@@ -43,10 +76,12 @@ in stdenv.mkDerivation rec {
     git jq yq-go tmux findutils gnumake
     hivemind
 
-    gerbil-unstable zlib md4c libyaml openssl
+    zlib md4c libyaml openssl
     clickhouse prometheus zookeeper
     gnuplot
-  ];
+    ansible
+
+  ] ++ scheme;
   shellHook = ''
     export root=$(pwd)
 
@@ -59,7 +94,7 @@ in stdenv.mkDerivation rec {
     export NIX_PATH="nixpkgs=${nixpkgs}"
 
     export GERBIL_BUILD_CORES=$(cat /proc/cpuinfo | grep -F processor | wc -l)
-    # WTF?! strace -s4096 -o out gxi -e "(import :corpix/gerbilstd/test)" says it only looks into the $GERBIL_PATH/lib
+    # WTF?! strace -s4096 -o out gxi -e "(import :corpix/gx/test)" says it only looks into the $GERBIL_PATH/lib
     export GERBIL_LOADPATH=$HOME/.gerbil/pkg
 
     export CFLAGS="-I${zlib.dev}/include -I${md4c}/include -I${libyaml}/include"

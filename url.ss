@@ -1,8 +1,8 @@
 (import	:gerbil/gambit
 	:std/format
 	:std/net/uri
-	:corpix/gerbilstd/hex
-	:corpix/gerbilstd/string)
+	:corpix/gx/hex
+	:corpix/gx/string)
 (export
   (import: :std/net/uri)
 

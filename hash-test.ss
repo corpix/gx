@@ -1,5 +1,5 @@
-(import	:corpix/gerbilstd/test
-	:corpix/gerbilstd/hash)
+(import	:corpix/gx/test
+	:corpix/gx/hash)
 
 (deftest "hash"
   ("hash-path-ref"

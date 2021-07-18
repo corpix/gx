@@ -1,17 +1,24 @@
 * TODO ask wtf with modules
-  =gxpkg link corpix/gerbilstd .= is not working as expected:
+  =gxpkg link corpix/gx .= is not working as expected:
 
   #+BEGIN_SRC scheme
-  (user)> (import-module ':corpix/gerbilstd/string #t #t)
+  (user)> (import-module ':corpix/gx/string #t #t)
   ; Evaluation aborted on Syntax Error
   *** ERROR IN ?
   --- Syntax Error: Cannot find library module
   ... form:   .
   (user)> (add-load-path (path-normalize "."))
   #!void
-  (user)> (import-module ':corpix/gerbilstd/string #t #t)
+  (user)> (import-module ':corpix/gx/string #t #t)
   #<module-context #20>
   (user)>
   #+END_SRC
 
 * TODO port i/o :yaml:
+  support port i/o in yaml package (FFI)
+
+* TODO clickhouse client
+  - [ ] implement placeholders escaping values during replacement
+  - [ ] emit query in text
+  - [ ] connection pool
+  - [ ] implement more statements

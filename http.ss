@@ -13,8 +13,8 @@
 	:std/misc/uuid
         :std/misc/list-builder
 	:std/misc/ports
-	:corpix/gerbilstd/url
-	(prefix-in :corpix/gerbilstd/multipart multipart-))
+	:corpix/gx/url
+	(prefix-in :corpix/gx/multipart multipart-))
 (export
   http-get http-head http-post http-put http-delete http-options
   http-request

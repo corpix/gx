@@ -53,4 +53,4 @@
   yaml_event_mapping_start
   yaml_event_mapping_end)
 
-(load-module "corpix/gerbilstd/libyaml")
+(load-module "corpix/gx/libyaml")

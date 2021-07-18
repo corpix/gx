@@ -1,9 +1,11 @@
-(import (for-syntax :std/sugar
+(import :gerbil/gambit
+	(for-syntax :std/sugar
 		    :std/stxutil))
-(export cond*
+(export (import: :gerbil/gambit)
+	cond*
 	let-cond
 	let*-cond
-	struct-set!)
+	cons->values)
 
 ;; cond for multiple choices
 (defrules cond* (else =>)
@@ -85,19 +87,5 @@
 ;; 	   ((b 10) (> b 5) b)
 ;; 	   (else 'baaaakaaa))
 
-;;
-
-(defsyntax (struct-set! stx)
-  (syntax-case stx ()
-    ((_ struct type key value)
-     (with-syntax ((field-set! (format-id #'stx "~a-~a-set!" #'type #'key)))
-       (syntax (field-set! struct value))))))
-
-;; (defstruct x (y z))
-;; (def xx (x 1 2))
-;; (x-y xx) ;; 1
-;; (x-z xx) ;; 2
-;; (struct-set! xx x y 666)
-;; (struct-set! xx x z 777)
-;; (x-y xx) ;; 666
-;; (x-z xx) ;; 777
+(def (cons->values x)
+  (values (car x) (cdr x)))

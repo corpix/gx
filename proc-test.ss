@@ -1,5 +1,5 @@
-(import :corpix/gerbilstd/test
-	:corpix/gerbilstd/proc)
+(import :corpix/gx/test
+	:corpix/gx/proc)
 
 (deftest "proc"
   ("->"

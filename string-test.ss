@@ -1,5 +1,5 @@
-(import :corpix/gerbilstd/test
-	:corpix/gerbilstd/string)
+(import :corpix/gx/test
+	:corpix/gx/string)
 
 (deftest "string"
   ("*->string"

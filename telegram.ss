@@ -6,11 +6,11 @@
 	:std/text/utf8
 	(for-syntax :std/iter
 		    :std/format)
-	:corpix/gerbilstd/scheme
-	:corpix/gerbilstd/list
-	:corpix/gerbilstd/string
-	:corpix/gerbilstd/proc
-	:corpix/gerbilstd/http)
+	:corpix/gx/scheme
+	:corpix/gx/list
+	:corpix/gx/string
+	:corpix/gx/proc
+	:corpix/gx/http)
 (export
   *token*
   *url*

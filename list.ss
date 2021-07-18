@@ -1,5 +1,7 @@
-(import :std/srfi/1)
-(export split-by
+(import :std/srfi/1
+	:std/misc/list)
+(export (import: :std/misc/list)
+	split-by
 	pairs)
 
 (def (split-by lst n)

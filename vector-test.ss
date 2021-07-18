@@ -1,6 +1,6 @@
-(import :corpix/gerbilstd/test
-	:corpix/gerbilstd/exception
-	:corpix/gerbilstd/vector)
+(import :corpix/gx/test
+	:corpix/gx/exception
+	:corpix/gx/vector)
 
 (deftest "u8vector"
   ("u8vector-index"

@@ -1,5 +1,5 @@
-(import	:corpix/gerbilstd/test
-	:corpix/gerbilstd/list)
+(import	:corpix/gx/test
+	:corpix/gx/list)
 
 (deftest "list"
   ("split-by"

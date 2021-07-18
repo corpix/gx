@@ -4,7 +4,7 @@
   (extended-bindings)
   (not safe))
 
-(namespace ("corpix/gerbilstd/libyaml#"))
+(namespace ("corpix/gx/libyaml#"))
 (##namespace ("" define-macro define let let* if or and
               quote quasiquote unquote unquote-splicing
               c-lambda c-define-type c-declare c-initialize))

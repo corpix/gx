@@ -1,5 +1,5 @@
-(import	:corpix/gerbilstd/test
-	:corpix/gerbilstd/bnf)
+(import	:corpix/gx/test
+	:corpix/gx/bnf)
 
 (deftest "encoding/bnf"
   ("terminals"

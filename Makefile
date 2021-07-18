@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
 
-name              = gerbilstd
+name              = gx
 namespace         = corpix
 version           ?= development
 

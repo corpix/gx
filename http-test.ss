@@ -3,9 +3,9 @@
 	:std/event
 	:std/misc/barrier
 	:gerbil/gambit
-	:corpix/gerbilstd/test
-	:corpix/gerbilstd/url
-	:corpix/gerbilstd/http)
+	:corpix/gx/test
+	:corpix/gx/url
+	:corpix/gx/http)
 
 (deftest "net/http/request"
   ("http-get"

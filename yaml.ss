@@ -5,7 +5,7 @@
         :std/misc/list-builder
         :std/text/utf8
 	:gerbil/gambit/misc
-        :corpix/gerbilstd/libyaml)
+        :corpix/gx/libyaml)
 (export *yaml-key-format*
 	yaml-load-path
 	yaml-load-string
